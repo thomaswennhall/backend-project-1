@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "email": "stabbing.steve@fuskeluring.hack",
+      "passwordHash": "grillkorv123"
+    },
+    {
+      "email": "murdering.mike@fuskeluring.hack",
+      "passwordHash": "bananpaj1337"
+    },
+    {
+      "email": "crimes.johnsson@fuskeluring.hack",
+      "passwordHash": "sötsursås42"
+    }
+  ]
+}
