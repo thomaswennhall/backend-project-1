@@ -24,7 +24,7 @@ const FakeProfile = sequelize.define('FakeProfile', {
     allowNull: false
   },
   birthday: {
-    type: DataTypes.DATE,
+    type: DataTypes.STRING,
     allowNull: false
   },
   birthCity: {
