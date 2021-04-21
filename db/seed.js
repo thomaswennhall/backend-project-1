@@ -8,11 +8,13 @@ const sequelize = new Sequelize({
 const User = sequelize.define('User', {
   email: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   passwordHash: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
   }
 })
 
@@ -51,20 +53,4 @@ FakeProfile.belongsTo(User)
 
 sequelize.sync()
 
-async function addUser(userObj){
-  const {email, passwordHash} = userObj
-  const user = await User.build({
-    email,
-    passwordHash
-  })
-  await user.save()
-}
-
-const {users} = require('./users.json')
-for(user of users){
-  try{
-    addUser(user)
-  }catch(error){
-    console.log(error.message);
-  }
-}
+module.exports = sequelize
