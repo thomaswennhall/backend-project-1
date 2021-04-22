@@ -37,12 +37,9 @@ const FakeProfile = db.define('FakeProfile', {
 FakeProfile.belongsTo(User)
 
 
-
-
 let callsCounter = 0
 const maxCalls = 10
 const coolDownTime = 10 * 1000 // 86400 * 10 for 24h
-
 
 const countDown = () => {
   setTimeout(() => {

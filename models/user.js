@@ -1,6 +1,7 @@
 const db = require('../database/connection')
 const {DataTypes} = require('sequelize')
 const hash = require('../hashing')
+const {InvalidCredentials} = require('../errors')
 
 const User = db.define('User', {
   email: {
@@ -17,7 +18,7 @@ const User = db.define('User', {
 
 User.getByEmail = async (email) => {
   const user = await User.findOne({ where: {email: email} })
-  if(!user) throw new Error('No user found with the given e-mail address')
+  if(!user) throw new InvalidCredentials('email')
   return user
 }
 

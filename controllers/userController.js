@@ -3,43 +3,43 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
 const User = require('../models/User')
+const {WrongPassword, InvalidBody} = require('../errors')
 
 const {JWT_SECRET} = process.env
 
 const getUserByEmail = async (req, res, next) => {
-  const {email} = req.body
+  const {email} = req.user
   try {
     const user = await User.getByEmail(email)
     res.json(user)
-  } catch(error) {
-    res.status(403).json({ error: error.message});
-  }
+  } catch(error) { next(error) }
 }
 
 const logIn = async (req, res, next) => {
-  const {email, password} = req.body
   try {
+    const {email, password} = req.body
+    if(!email || !password) { throw new InvalidBody() }
+
     const user = await User.getByEmail(email)
     const passwordMatch = bcrypt.compareSync(password, user.passwordHash)
     if(passwordMatch){
       const token = jwt.sign({email}, JWT_SECRET)
       res.json({token})
     } else {
-      res.status(401).json({ error: 'Wrong password!'});
+      throw new WrongPassword()
     }
-  } catch(error) {
-    res.status(403).json({ error: error.message});
-  }
+  } catch(error) { next(error) }
 }
 
 const changePassword = async (req, res, next) => {
-  const {email, newPassword} = req.body
   try {
+    const {email} = req.user
+    const {newPassword} = req.body
+    if(!newPassword) { throw new InvalidBody() }
+
     const changed = await User.changePassword(email, newPassword)
     res.json(changed)
-  } catch(error) {
-    res.status(403).json({ error: error.message});
-  }
+  } catch(error) { next(error) }
 }
 
 module.exports = {

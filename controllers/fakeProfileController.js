@@ -1,7 +1,7 @@
 const FakeProfile = require('../models/FakeProfile')
 
 const generate = async (req, res, next) => {
-  const {email} = req.body
+  const {email} = req.user
   try{
     const profile = await FakeProfile.generateProfile(email)
     res.json(profile)
