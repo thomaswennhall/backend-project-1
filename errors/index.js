@@ -28,11 +28,19 @@ class Unauthorized extends FuskeluringError {
     this.status = 401
   }
 }
+class CallsExceeded extends FuskeluringError {
+  constructor(timeLeft) {
+    super()
+    this.message = `Maximum amount of calls exceeded, try again in ${Math.round(timeLeft/1000)} seconds`
+    this.status = 401
+  }
+}
 
 module.exports = {
   FuskeluringError,
   WrongPassword,
   InvalidBody,
   InvalidCredentials,
-  Unauthorized
+  Unauthorized,
+  CallsExceeded
 }

@@ -9,10 +9,20 @@ const User = db.define('User', {
     allowNull: false,
     unique: true
   },
-  passwordHash: {
+  digest: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true
+  },
+  callsToday: {
+    type: DataTypes.NUMBER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  limitReachedAt: {
+    type: DataTypes.NUMBER,
+    allowNull: false,
+    defaultValue: 0
   }
 })
 
@@ -25,7 +35,7 @@ User.getByEmail = async (email) => {
 User.changePassword = async (email, newPassword) => {
   const user = await User.getByEmail(email)
   const digest = hash(newPassword)
-  user.passwordHash = digest
+  user.digest = digest
   await user.save()
   return 'Successfully changed password!'
 }

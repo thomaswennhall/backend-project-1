@@ -2,6 +2,7 @@ const db = require('../database/connection')
 const {DataTypes} = require('sequelize')
 const User = require('./User')
 const faker = require('faker')
+const {CallsExceeded} = require('../errors')
 
 const FakeProfile = db.define('FakeProfile', {
   name: {
@@ -36,15 +37,31 @@ const FakeProfile = db.define('FakeProfile', {
 
 FakeProfile.belongsTo(User)
 
-
-let callsCounter = 0
-const maxCalls = 10
-const coolDownTime = 10 * 1000 // 86400 * 10 for 24h
-
-const countDown = () => {
-  setTimeout(() => {
-    callsCounter = 0
-  }, coolDownTime)
+// THROTTLE FUNCTION
+const maxCalls = 2
+const coolDownTime = 60 * 1000 // 86400 * 10 for 24h
+const countDown = async (user) => {
+  user.limitReachedAt = Date.now()
+  await user.save()
+  return checkUserCoolDown(user)
+}
+const checkUserCoolDown = (user) => {
+  if(user.limitReachedAt === 0){
+    return null
+  } else {
+    const timeLeft = user.limitReachedAt - Date.now() + coolDownTime
+    if(timeLeft < 0) {
+      resetUserCoolDown(user)
+      return null
+    } else {
+      return timeLeft
+    }
+  }
+}
+const resetUserCoolDown = async (user) => {
+  user.limitReachedAt = 0
+  user.callsToday = 0
+  await user.save()
 }
 
 const getFakerProfile = () => {
@@ -71,16 +88,28 @@ const getFakerProfile = () => {
 FakeProfile.generateProfile = async (email) => {
   const user = await User.findOne({ where: {email: email} })
 
-  if(callsCounter < maxCalls){
+  const userCoolDown = checkUserCoolDown(user)
+  if(userCoolDown){
+    throw new CallsExceeded(userCoolDown)
+  }
+
+  if(user.callsToday < maxCalls){
     const fakerProfile = getFakerProfile()
     const profile = await FakeProfile.build({...fakerProfile, UserId: user.id})
     await profile.save()
-    callsCounter++
+
+    user.callsToday++
+    await user.save()
+
+    if(user.callsToday === maxCalls) {
+      countDown(user)
+    }
+
     return profile
-  } else {
-    countDown()
-    throw new Error('Maximum calls exceeded, try again tomorrow')
-  }
+  } /* else {
+   
+    throw new CallsExceeded(timeLeft)
+  } */
 }
 
 module.exports = FakeProfile

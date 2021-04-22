@@ -21,7 +21,7 @@ const logIn = async (req, res, next) => {
     if(!email || !password) { throw new InvalidBody() }
 
     const user = await User.getByEmail(email)
-    const passwordMatch = bcrypt.compareSync(password, user.passwordHash)
+    const passwordMatch = bcrypt.compareSync(password, user.digest)
     if(passwordMatch){
       const token = jwt.sign({email}, JWT_SECRET)
       res.json({token})

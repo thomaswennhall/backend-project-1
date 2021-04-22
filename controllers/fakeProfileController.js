@@ -5,9 +5,7 @@ const generate = async (req, res, next) => {
   try{
     const profile = await FakeProfile.generateProfile(email)
     res.json(profile)
-  } catch(error) {
-    res.status(403).json({error: error.message})
-  }
+  } catch(error) { next(error) }
 }
 
 module.exports = {generate}
