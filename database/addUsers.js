@@ -1,8 +1,8 @@
-const {models} = require('./seed')
+const User = require('../models/User')
 
 async function addUser(userObj){
   const {email, passwordHash} = userObj
-  const user = await models.User.build({
+  const user = await User.build({
     email,
     passwordHash
   })
