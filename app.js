@@ -2,7 +2,7 @@ const express = require('express')
 require('dotenv').config()
 
 const errorHandler = require('./middleware/errorHandler')
-const {logger} = require('./middleware/loggers')
+const logger = require('./middleware/logger')
 
 const app = express()
 const PORT = process.env.PORT || 5000
