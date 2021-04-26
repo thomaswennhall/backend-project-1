@@ -5,7 +5,8 @@ const {userAuth} = require('../middleware/auth')
 
 const userController = require('../controllers/userController')
 
-router.get('', userAuth, userController.getUserByEmail)
-router.patch('', userAuth, userController.changePassword)
+router.get('/me', userAuth, userController.getUserByEmail)
+router.patch('/me', userAuth, userController.changePassword)
+router.post('/login', userController.logIn)
 
 module.exports = router
