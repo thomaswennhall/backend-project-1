@@ -10,7 +10,8 @@ const {JWT_SECRET} = process.env
 const getUserByEmail = async (req, res, next) => {
   const {email} = req.user
   try {
-    const user = await User.getByEmail(email)
+    const {id, callsToday, limitReachedAt} = await User.getByEmail(email)
+    const user = {id, email, callsToday, limitReachedAt}
     res.json(user)
   } catch(error) { next(error) }
 }
