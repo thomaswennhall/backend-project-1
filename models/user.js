@@ -1,6 +1,6 @@
 const db = require('../database/connection')
 const {DataTypes} = require('sequelize')
-const hash = require('../hashing')
+const {hash} = require('../hashing')
 const {InvalidCredentials} = require('../errors')
 
 const User = db.define('User', {

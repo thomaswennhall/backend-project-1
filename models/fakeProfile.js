@@ -3,6 +3,8 @@ const {DataTypes} = require('sequelize')
 const User = require('./User')
 const faker = require('faker')
 const {CallsExceeded} = require('../errors')
+const crypto = require('crypto')
+require('dotenv').config()
 
 const FakeProfile = db.define('FakeProfile', {
   name: {
@@ -39,7 +41,7 @@ FakeProfile.belongsTo(User)
 
 // THROTTLE FUNCTION
 const maxCalls = 2
-const coolDownTime = 60 * 1000 // 86400 * 10 for 24h
+const coolDownTime = 5 * 1000 // 86400 * 10 for 24h
 const countDown = async (user) => {
   user.limitReachedAt = Date.now()
   await user.save()
@@ -104,12 +106,30 @@ FakeProfile.generateProfile = async (email) => {
     if(user.callsToday === maxCalls) {
       countDown(user)
     }
+    const hex = FakeProfile.generateHexData(profile)
+    return {profile, hex}
+  }
+}
 
-    return profile
-  } /* else {
-   
-    throw new CallsExceeded(timeLeft)
-  } */
+const {CIPHER_KEY} = process.env
+const {CIPHER_IV} = process.env
+
+FakeProfile.generateHexData = (profile) => {
+  profile = JSON.stringify(profile)
+  const cipher = crypto.createCipheriv('aes256', CIPHER_KEY, CIPHER_IV)
+  
+  let cipherString = cipher.update(profile, 'utf-8', 'hex')
+  cipherString += cipher.final('hex')
+  
+  return cipherString
+}
+
+FakeProfile.getProfileFromHex = (hexData) => {
+  const decipher = crypto.createDecipheriv('aes256', CIPHER_KEY, CIPHER_IV)
+  let decipheredString = decipher.update(hexData, 'hex', 'utf-8')
+  decipheredString += decipher.final('utf-8')
+  const decipheredJSON = JSON.parse(decipheredString)
+  return decipheredJSON
 }
 
 module.exports = FakeProfile
