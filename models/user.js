@@ -1,7 +1,12 @@
 const db = require('../database/connection')
 const {DataTypes} = require('sequelize')
 const {hash} = require('../hashing')
-const {InvalidCredentials} = require('../errors')
+const {InvalidCredentials, TokenExpired, Unauthorized, NotNewPassword} = require('../errors')
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
+require('dotenv').config()
+
+const {JWT_SECRET} = process.env
 
 const User = db.define('User', {
   email: {
@@ -34,11 +39,28 @@ User.getByEmail = async (email) => {
 
 User.changePassword = async (email, newPassword) => {
   const user = await User.getByEmail(email)
+  const exsistingPassword = bcrypt.compareSync(newPassword, user.digest)
+  if(exsistingPassword){ throw new NotNewPassword() } 
+
   const digest = hash(newPassword)
   user.digest = digest
   await user.save()
   return 'Successfully changed password!'
 }
 
+User.validateToken = (token) => {
+  try{
+    const user = jwt.verify(token, JWT_SECRET)
+    return user
+  } catch(error) {
+    if(error instanceof jwt.TokenExpiredError){
+      throw new TokenExpired()
+    }else if(error instanceof jwt.JsonWebTokenError){
+      throw new Unauthorized()
+    }else{
+      throw error
+    }
+  }
+}
 
 module.exports = User

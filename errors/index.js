@@ -7,6 +7,13 @@ class WrongPassword extends FuskeluringError {
     this.status = 403
   }
 }
+class NotNewPassword extends FuskeluringError {
+  constructor() {
+    super()
+    this.message = 'You have to select a new password.'
+    this.status = 403
+  }
+}
 class InvalidBody extends FuskeluringError {
   constructor() {
     super()
@@ -28,6 +35,13 @@ class Unauthorized extends FuskeluringError {
     this.status = 401
   }
 }
+class TokenExpired extends FuskeluringError {
+  constructor() {
+    super()
+    this.message = 'Request failed, Try logging in again.'
+    this.status = 403
+  }
+}
 class CallsExceeded extends FuskeluringError {
   constructor(timeLeft) {
     super()
@@ -39,8 +53,10 @@ class CallsExceeded extends FuskeluringError {
 module.exports = {
   FuskeluringError,
   WrongPassword,
+  NotNewPassword,
   InvalidBody,
   InvalidCredentials,
   Unauthorized,
+  TokenExpired,
   CallsExceeded
 }

@@ -24,7 +24,7 @@ const logIn = async (req, res, next) => {
     const user = await User.getByEmail(email)
     const passwordMatch = bcrypt.compareSync(password, user.digest)
     if(passwordMatch){
-      const token = jwt.sign({email}, JWT_SECRET)
+      const token = jwt.sign({email}, JWT_SECRET, {expiresIn: '2h'})
       res.json({token})
     } else {
       throw new WrongPassword()
