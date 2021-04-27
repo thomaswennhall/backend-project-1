@@ -8,15 +8,15 @@ const generate = async (req, res, next) => {
   } catch(error) { next(error) }
 }
 
-const getProfileFromHex = async (req, res, next) => {
-  const {hexData} = req.params
+const getProfileFromBase64 = async (req, res, next) => {
+  const {base64Data} = req.params
   try{
-    const profile = await FakeProfile.getProfileFromHex(hexData)
+    const profile = await FakeProfile.getFromBase64(base64Data)
     res.json(profile)
   } catch(error) {next(error)}
 }
 
 module.exports = {
   generate,
-  getProfileFromHex
+  getProfileFromBase64
 }

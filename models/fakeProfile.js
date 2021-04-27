@@ -39,14 +39,14 @@ const FakeProfile = db.define('FakeProfile', {
 
 FakeProfile.belongsTo(User)
 
-// THROTTLE FUNCTION
 const maxCalls = 2
-const coolDownTime = 5 * 1000 // 86400 * 10 for 24h
+const coolDownTime = 5 * 1000 // 86400000 for 24h
+
 const countDown = async (user) => {
   user.limitReachedAt = Date.now()
   await user.save()
-  return checkUserCoolDown(user)
 }
+
 const checkUserCoolDown = (user) => {
   if(user.limitReachedAt === 0){
     return null
@@ -98,7 +98,6 @@ FakeProfile.generateProfile = async (email) => {
   if(user.callsToday < maxCalls){
     const fakerProfile = getFakerProfile()
     const profile = await FakeProfile.build({...fakerProfile, UserId: user.id})
-    await profile.save()
 
     user.callsToday++
     await user.save()
@@ -106,27 +105,47 @@ FakeProfile.generateProfile = async (email) => {
     if(user.callsToday === maxCalls) {
       countDown(user)
     }
-    const hex = FakeProfile.generateHexData(profile)
-    return {profile, hex}
+    const base64 = FakeProfile.generateBase64Data(profile)
+    return {profile, base64}
   }
 }
 
-const {CIPHER_KEY} = process.env
-const {CIPHER_IV} = process.env
+const {CIPHER_KEY, CIPHER_IV} = process.env
 
-FakeProfile.generateHexData = (profile) => {
+const convertFromBase64ToURL = (base64String) => {
+  let urlString = base64String.split('/').join('_')
+  urlString = urlString.split('+').join('.')
+  urlString = urlString.split('=').join('-')
+
+  return urlString
+}
+
+const convertURLToBase64 = (urlString) => {
+  let base64String = urlString.split('_').join('/')
+  base64String = base64String.split('.').join('+')
+  base64String = base64String.split('-').join('=')
+
+  return base64String
+}
+
+FakeProfile.generateBase64Data = (profile) => {
   profile = JSON.stringify(profile)
   const cipher = crypto.createCipheriv('aes256', CIPHER_KEY, CIPHER_IV)
   
-  let cipherString = cipher.update(profile, 'utf-8', 'hex')
-  cipherString += cipher.final('hex')
-  
-  return cipherString
+  let cipherString = cipher.update(profile, 'utf-8', 'base64')
+  cipherString += cipher.final('base64')
+
+  const urlFriendlyString = convertFromBase64ToURL(cipherString)
+
+  return urlFriendlyString
 }
 
-FakeProfile.getProfileFromHex = (hexData) => {
+FakeProfile.getFromBase64 = (urlString) => {
   const decipher = crypto.createDecipheriv('aes256', CIPHER_KEY, CIPHER_IV)
-  let decipheredString = decipher.update(hexData, 'hex', 'utf-8')
+
+  const base64Data = convertURLToBase64(urlString)
+
+  let decipheredString = decipher.update(base64Data, 'base64', 'utf-8')
   decipheredString += decipher.final('utf-8')
   const decipheredJSON = JSON.parse(decipheredString)
   return decipheredJSON
