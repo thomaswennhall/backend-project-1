@@ -1,10 +1,11 @@
 const User = require('../models/User')
 
 async function addUser(userObj){
-  const {email, digest} = userObj
+  const {email, digest, role} = userObj
   const user = await User.build({
     email,
-    digest
+    digest,
+    role
   })
   await user.save()
 }

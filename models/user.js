@@ -16,8 +16,7 @@ const User = db.define('User', {
   },
   digest: {
     type: DataTypes.STRING,
-    allowNull: false,
-    unique: true
+    allowNull: false
   },
   callsToday: {
     type: DataTypes.NUMBER,
@@ -28,6 +27,11 @@ const User = db.define('User', {
     type: DataTypes.NUMBER,
     allowNull: false,
     defaultValue: 0
+  },
+  role: {
+    type: DataTypes.STRING,
+    enum: ['user', 'admin'],
+    defaultValue: 'user'
   }
 })
 

@@ -11,6 +11,11 @@
     {
       "email": "crimes.johnsson@fuskeluring.hack",
       "digest": "$2a$10$12sukVM9xt./uQfEvj11y.bHC5RR0sVFYbrsaL5V6phSQRKr3qmd6"
+    },
+    {
+      "email": "admin.boy@fuskeluring.hack",
+      "digest": "$2a$10$12sukVM9xt./uQfEvj11y.bHC5RR0sVFYbrsaL5V6phSQRKr3qmd6",
+      "role": "admin"
     }
   ]
 }

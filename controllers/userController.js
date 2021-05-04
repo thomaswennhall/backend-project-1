@@ -24,7 +24,7 @@ const logIn = async (req, res, next) => {
     const user = await User.getByEmail(email)
     const passwordMatch = bcrypt.compareSync(password, user.digest)
     if(passwordMatch){
-      const token = jwt.sign({email}, JWT_SECRET, {expiresIn: '2h'})
+      const token = jwt.sign({email, role: user.role}, JWT_SECRET, {expiresIn: '2h'})
       res.json({token})
     } else {
       throw new WrongPassword()
@@ -43,8 +43,16 @@ const changePassword = async (req, res, next) => {
   } catch(error) { next(error) }
 }
 
+const getAll = async (req, res, next) => {
+  try{
+    const users = await User.findAll()
+    res.json(users)
+  }catch(error){ next(error) }
+}
+
 module.exports = {
   getUserByEmail,
   logIn,
-  changePassword
+  changePassword,
+  getAll
 }
